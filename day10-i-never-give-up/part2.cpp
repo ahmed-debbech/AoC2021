@@ -6,11 +6,11 @@
 #include <stack>
 #include <vector>
 #include <list>
+#include <bits/stdc++.h>
 #define MAX 98
 
 using namespace std;
 
- 
 list<string> file_reader(){
     FILE * f = fopen("input", "r");
     if(f != NULL){
@@ -18,6 +18,7 @@ list<string> file_reader(){
     
         char line[1000];
         while (feof(f) == 0) {
+            //printf("1: %s", line);
             fgets(line, 1000, f);
             string s(line);
             lines.push_back(s);
@@ -43,6 +44,24 @@ int isEqual(char c, char j, char poss[]){
         }
     }
     return 0;
+}
+unsigned long int closeCharScore(char openning){
+    unsigned long int sc = 0;
+    switch(openning){
+        case '(':
+        sc = 1;
+        break;
+        case '[':
+        sc = 2;
+        break;
+        case '{':
+        sc = 3;
+        break;
+        case '<':
+        sc = 4;
+        break;
+    }
+    return sc;
 }
 int main(){    
     std::cout << "Hello world!" << std::endl;
@@ -72,58 +91,42 @@ int main(){
         std::list<std::string>::iterator it = lines.begin();
         int j=0;
         it = lines.begin();
-        vector<int> errors = {0, 0, 0, 0};
+        vector<unsigned long int> scores;
         for(i=0; i<MAX; i++){
-            printf("\n\n");
-            printf("A NEW LINEEEE\n");
             std::stack<char> stack;
+            bool hasError = false;
             for(j=0; j<=(*it).size()-1; j++){
                 if(oneOfClosings((*it)[j], possible_chars) == 1){
-                    printf("%c is one of the closings\n", (*it)[j]);
                     if(stack.empty()){
-                        printf("started with null :(");
                         return 0;
                     }else{
                         if(isEqual((*it)[j], stack.top(), possible_chars) == 1){
-                            printf("+ a chunk has been closed\n");
                             stack.pop();
                         }else{
                             printf("*** ERR FOUND ***\n");
-                            switch((*it)[j]){
-                                case ')':
-                                    errors[0]++;
-                                break;
-                                case ']':
-                                    errors[1]++;
-                                break;
-                                case '}':
-                                    errors[2]++;
-                                break;
-                                case '>':
-                                    errors[3]++;
-                                break;
-                            }
+                            hasError = true;
                             break;
                         }
                     }
                 }else{
-                    printf("%c is one of the opennings\n", (*it)[j]);
                     stack.push((*it)[j]);
                 }
-                printf("&&&&&&&&&&&&&\n\n");
+            }
+            if(!hasError){
+                cout << "no error" << endl;
+                unsigned long int sco = 0;
+                while(!stack.empty()){
+                    sco = (sco * 5) + closeCharScore(stack.top());
+                    stack.pop();
+                }
+                cout << "final score: " << sco << endl; 
+                scores.push_back(sco);
             }
             std::advance(it, 1);
         }
-
-        //count the errors
-        unsigned long int sum = 0;
-        cout << errors[0] << " " << errors[1] << " " <<  errors[2] << " " << errors[3] << endl;
-        sum += (errors[0] * 3);
-        sum += (errors[1] * 57);
-        sum += (errors[2] * 1197);
-        sum += (errors[3] * 25137);
-
-        cout << "THE RESULT: " << sum << endl;
+        sort(scores.begin(), scores.end());
+    
+        cout << "THE RESULT: " << scores[scores.size()/2] << endl;
     }
     return 0;
 }
